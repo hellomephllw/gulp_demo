@@ -1,0 +1,7 @@
+@import "common/variable";
+@import "common/mixin";
+
+body {
+    font: #{$fontSizeDefault}/#{$lineHeightDefault} $fontFamilyDefault;
+    color: $colorDefault;
+}
