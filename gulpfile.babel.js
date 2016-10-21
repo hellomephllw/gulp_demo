@@ -51,7 +51,7 @@ gulp.task('js', () => {
     gulp.src(filePaths.jsFiles.map(filePath => `${paths.jsSrc}/${filePath}`))
         .pipe(cmdPack({
             //入口模块id
-            mainId: 'app',
+            mainId: 'entry',
             //基础路径
             base: paths.jsSrc,
             //依赖包的快捷访问别名

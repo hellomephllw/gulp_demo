@@ -6,3 +6,5 @@ var json = {
     name: 'zhangsan',
     age: 18
 };
+
+console.log('hello man');
