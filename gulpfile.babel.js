@@ -9,6 +9,7 @@ import cmdPack from 'gulp-cmd-pack';
 import concat from 'gulp-concat';
 import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
+import fs from 'fs';
 
 //paths
 const paths = {
@@ -40,7 +41,7 @@ gulp.task('css', () =>
         .pipe(gulp.dest(`${paths.cssAssets}/${paths.resources}`))
 );
 //clean
-gulp.task('cssClean', () => del(`${paths.cssAssets}/**`));
+gulp.task('cssClean', () => del(`${paths.cssAssets}/**/*.css`));
 
 /**dispose images*/
 //imgs
@@ -88,25 +89,46 @@ gulp.task('js', () => {
         .pipe(rev.manifest())
         //输出rev-manifest.json
         .pipe(gulp.dest(`${paths.jsAssets}/${paths.resources}`));
+    console.log('finish js');
 });
 //clean
-gulp.task('jsClean', () => del(`${paths.jsAssets}/**`));
+gulp.task('jsClean', () => del(`${paths.jsAssets}/**/*(*.js|*.map)`));
 
 /**dispose views*/
 //revreplace
+let firstTimeRun = true;
 gulp.task('revreplace', () => {
-    //读取rev-manifest.json
-    let manifest = gulp.src([
-        `${paths.jsAssets}/${paths.resources}/rev-manifest.json`,
-        `${paths.cssAssets}/${paths.resources}/rev-manifest.json`
-    ]);
+    if (firstTimeRun) {
+        //执行替换
+        executeVersionReplace();
+        firstTimeRun = false;
+    } else {
+        //开启监听
+        let watcher = fs.watch(`${paths.jsAssets}/${paths.resources}/rev-manifest.json`);
+        //manifest文件改动handler
+        watcher.on('change', () => {
+            //关闭监听
+            watcher.close();
+            //执行替换
+            executeVersionReplace();
+        });
+    }
 
-    gulp.src(`${paths.viewsSrc}/*.html`)
+    //执行页面的版本替换
+    function executeVersionReplace() {
+        //读取rev-manifest.json
+        let manifest = gulp.src([
+            `${paths.jsAssets}/${paths.resources}/rev-manifest.json`,
+            `${paths.cssAssets}/${paths.resources}/rev-manifest.json`
+        ]);
+
+        gulp.src(`${paths.viewsSrc}/*.html`)
         //根据rev-manifest.json替换文件名
-        .pipe(revReplace({
-            manifest: manifest
-        }))
-        .pipe(gulp.dest(paths.viewsAssets))
+            .pipe(revReplace({
+                manifest: manifest
+            }))
+            .pipe(gulp.dest(paths.viewsAssets));
+    }
 });
 
 /**default*/
