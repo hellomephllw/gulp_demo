@@ -89,56 +89,61 @@ gulp.task('js', () => {
         .pipe(rev.manifest())
         //输出rev-manifest.json
         .pipe(gulp.dest(`${paths.jsAssets}/${paths.resources}`));
-    console.log('finish js');
 });
 //clean
 gulp.task('jsClean', () => del(`${paths.jsAssets}/**/*(*.js|*.map)`));
 
 /**dispose views*/
-//revreplace
-let firstTimeRun = true;
-gulp.task('revreplace', () => {
-    if (firstTimeRun) {
+//revReplace
+gulp.task('revReplace', () => {
+    //执行替换
+    executeVersionReplace();
+});
+//revReplace for watch
+gulp.task('revReplaceForWatch', () => {
+    //开启监听
+    let jsWatcher = fs.watch(`${paths.jsAssets}/${paths.resources}/rev-manifest.json`),
+        cssWatcher = fs.watch(`${paths.cssAssets}/${paths.resources}/rev-manifest.json`);
+
+    //manifest文件改动handler
+    jsWatcher.on('change', () => {
+        //关闭监听
+        jsWatcher.close();
+        cssWatcher.close();
         //执行替换
         executeVersionReplace();
-        firstTimeRun = false;
-    } else {
-        //开启监听
-        let watcher = fs.watch(`${paths.jsAssets}/${paths.resources}/rev-manifest.json`);
-        //manifest文件改动handler
-        watcher.on('change', () => {
-            //关闭监听
-            watcher.close();
-            //执行替换
-            executeVersionReplace();
-        });
-    }
-
-    //执行页面的版本替换
-    function executeVersionReplace() {
-        //读取rev-manifest.json
-        let manifest = gulp.src([
-            `${paths.jsAssets}/${paths.resources}/rev-manifest.json`,
-            `${paths.cssAssets}/${paths.resources}/rev-manifest.json`
-        ]);
-
-        gulp.src(`${paths.viewsSrc}/*.html`)
-        //根据rev-manifest.json替换文件名
-            .pipe(revReplace({
-                manifest: manifest
-            }))
-            .pipe(gulp.dest(paths.viewsAssets));
-    }
+    });
+    cssWatcher.on('change', () => {
+        //关闭监听
+        jsWatcher.close();
+        cssWatcher.close();
+        //执行替换
+        executeVersionReplace();
+    });
 });
+//执行页面的版本替换
+function executeVersionReplace() {
+    //读取rev-manifest.json
+    let manifest = gulp.src([
+        `${paths.jsAssets}/${paths.resources}/rev-manifest.json`,
+        `${paths.cssAssets}/${paths.resources}/rev-manifest.json`
+    ]);
+
+    gulp.src(`${paths.viewsSrc}/*.html`)
+        //根据rev-manifest.json替换文件名
+        .pipe(revReplace({
+            manifest: manifest
+        }))
+        .pipe(gulp.dest(paths.viewsAssets));
+}
 
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
     //执行
-    // gulp.run('imgs', 'css', 'cssReplace', 'js', 'jsReplace');
-    runSequence(['imgs', 'css', 'js'], ['revreplace']);
+    runSequence(['imgs', 'css', 'js'], ['revReplace']);
 
     //监听
-    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('cssClean', 'css', 'revreplace'));
-    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revreplace'));
-    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('jsClean', 'js', 'revreplace'));
+    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
+    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
 });
