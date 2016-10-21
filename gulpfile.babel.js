@@ -7,11 +7,14 @@ import del from 'del';
 import runSequence from 'run-sequence';
 import cmdPack from 'gulp-cmd-pack';
 import concat from 'gulp-concat';
+import uglify from 'gulp-uglify';
+import sourcemaps from 'gulp-sourcemaps';
 
 //paths
 const paths = {
     src: 'src',
     assets: 'assets',
+    resources: 'resources',
     viewsSrc: 'src/views',
     viewsAssets: 'assets/views',
     cssSrc: 'src/css',
@@ -22,9 +25,7 @@ const paths = {
     jsAssets: 'assets/js'
 };
 
-//clean
-gulp.task('clean', () => del([`${paths.cssAssets}/*.css`, `${paths.jsAssets}/*.js`]));
-
+/**dispose css*/
 //css
 gulp.task('css', () =>
     gulp.src(`${paths.cssSrc}/*.scss`)
@@ -36,17 +37,22 @@ gulp.task('css', () =>
         .pipe(rev())
         .pipe(gulp.dest(paths.cssAssets))
         .pipe(rev.manifest())
-        .pipe(gulp.dest(paths.assets))
+        .pipe(gulp.dest(`${paths.cssAssets}/${paths.resources}`))
 );
+//clean
+gulp.task('cssClean', () => del(`${paths.cssAssets}/**`));
 
+/**dispose images*/
 //imgs
 gulp.task('imgs', () =>
     gulp.src(`${paths.imgsSrc}/*`)
         .pipe(gulp.dest(`${paths.imgsAssets}`))
 );
 
+/**dispose fonts*/
 //fonts
 
+/**dispose scripts*/
 //js
 gulp.task('js', () => {
     //common
@@ -69,20 +75,31 @@ gulp.task('js', () => {
             //不将jq打入包
             ignore: ['jquery']
         }))
-        //md5加密
+        .pipe(sourcemaps.init())
+        //压缩
+        .pipe(uglify())
+        //hashcode
         .pipe(rev())
+        //source map
+        .pipe(sourcemaps.write(paths.resources))
         //输出
         .pipe(gulp.dest(`${paths.jsAssets}`))
         //生成rev-manifest.json
         .pipe(rev.manifest())
         //输出rev-manifest.json
-        .pipe(gulp.dest(paths.assets));
+        .pipe(gulp.dest(`${paths.jsAssets}/${paths.resources}`));
 });
+//clean
+gulp.task('jsClean', () => del(`${paths.jsAssets}/**`));
 
+/**dispose views*/
 //revreplace
-gulp.task('revreplace', ['css'], () => {
+gulp.task('revreplace', () => {
     //读取rev-manifest.json
-    let manifest = gulp.src(`${paths.assets}/rev-manifest.json`);
+    let manifest = gulp.src([
+        `${paths.jsAssets}/${paths.resources}/rev-manifest.json`,
+        `${paths.cssAssets}/${paths.resources}/rev-manifest.json`
+    ]);
 
     gulp.src(`${paths.viewsSrc}/*.html`)
         //根据rev-manifest.json替换文件名
@@ -92,12 +109,14 @@ gulp.task('revreplace', ['css'], () => {
         .pipe(gulp.dest(paths.viewsAssets))
 });
 
-//default
-gulp.task('default', ['clean'], () => {
+/**default*/
+gulp.task('default', ['cssClean', 'jsClean'], () => {
     //执行
-    gulp.run('imgs', 'css', 'js', 'revreplace');
+    // gulp.run('imgs', 'css', 'cssReplace', 'js', 'jsReplace');
+    runSequence(['imgs', 'css', 'js'], ['revreplace']);
 
     //监听
-    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('clean', ['css', 'revreplace']));
-    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('clean', ['revreplace']));
+    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('cssClean', 'css', 'revreplace'));
+    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revreplace'));
+    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('jsClean', 'js', 'revreplace'));
 });
