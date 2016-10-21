@@ -10,26 +10,12 @@ import concat from 'gulp-concat';
 import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
 import fs from 'fs';
-
-//paths
-const paths = {
-    src: 'src',
-    assets: 'assets',
-    resources: 'resources',
-    viewsSrc: 'src/views',
-    viewsAssets: 'assets/views',
-    cssSrc: 'src/css',
-    cssAssets: 'assets/css',
-    imgsSrc: 'src/imgs',
-    imgsAssets: 'assets/imgs',
-    jsSrc: 'src/js',
-    jsAssets: 'assets/js'
-};
+import {paths, filePaths} from './gulpfile.config';
 
 /**dispose css*/
 //css
 gulp.task('css', () =>
-    gulp.src(`${paths.cssSrc}/*.scss`)
+    gulp.src(filePaths.cssFiles.map(filePath => `${paths.cssSrc}/${filePath}`))
         //编译css代码
         .pipe(sass({
             //压缩css
@@ -57,28 +43,25 @@ gulp.task('imgs', () =>
 //js
 gulp.task('js', () => {
     //common
-    gulp.src([`${paths.jsSrc}/lib/sea.js`, `${paths.jsSrc}/lib/jquery-1.12.4.min.js`])
+    gulp.src(filePaths.jsCommon.map(filename => `${paths.jsSrc}/${filename}`))
         .pipe(concat('common.js'))
         .pipe(gulp.dest(`${paths.jsAssets}`));
 
     //special
-    gulp.src(`${paths.jsSrc}/*.js`)
+    gulp.src(filePaths.jsFiles.map(filePath => `${paths.jsSrc}/${filePath}`))
         .pipe(cmdPack({
             //入口模块id
             mainId: 'app',
             //基础路径
             base: paths.jsSrc,
             //依赖包的快捷访问别名
-            alias: {
-                jquery: 'lib/jquery-1.12.4.min',
-                utilities: 'lib/utilities'
-            },
+            alias: filePaths.jsAlias,
             //不将jq打入包
-            ignore: ['jquery']
+            ignore: filePaths.jsIgnore
         }))
         .pipe(sourcemaps.init())
         //压缩
-        .pipe(uglify())
+        // .pipe(uglify())
         //hashcode
         .pipe(rev())
         //source map
@@ -143,7 +126,7 @@ gulp.task('default', ['cssClean', 'jsClean'], () => {
     runSequence(['imgs', 'css', 'js'], ['revReplace']);
 
     //监听
-    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
-    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
+    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
+    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
 });
