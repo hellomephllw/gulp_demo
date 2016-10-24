@@ -10,6 +10,7 @@ var json = {
 };
 
 console.log('hello man');
+console.log('yes');
 });
 define("utilities" ,[], function(require , exports , module){
 var utilities = {
@@ -20,12 +21,5 @@ var utilities = {
 
 module.exports = utilities;
 });
-define("entry" ,["jquery","utilities"], function(require , exports , module){
-var $ = require('jquery'),
-    utility = require('utilities');
 
-console.log($);
-utility.add();
-});
-
-//# sourceMappingURL=resources/index-dd5d7b075d.js.map
+//# sourceMappingURL=resources/homepage-a0d6e77047.js.map

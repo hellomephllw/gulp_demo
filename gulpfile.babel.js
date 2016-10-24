@@ -10,6 +10,7 @@ import cmdPack from 'gulp-cmd-pack';
 import concat from 'gulp-concat';
 import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
+import browserSync from 'browser-sync';
 import fs from 'fs';
 import {paths, filePaths} from './gulpfile.config';
 
@@ -119,16 +120,24 @@ function executeVersionReplace() {
         .pipe(revReplace({
             manifest: manifest
         }))
-        .pipe(gulp.dest(paths.viewsAssets));
+        .pipe(gulp.dest(paths.viewsAssets))
+        //支持browserSync
+        .pipe(browserSync.reload({stream: true}));
 }
 
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
+    browserSync({
+        server: {
+            baseDir: './'
+        }
+    });
+
     //执行
     runSequence(['imgs', 'css', 'js'], ['revReplace']);
 
     //监听
-    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
-    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
+    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
+    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
 });
