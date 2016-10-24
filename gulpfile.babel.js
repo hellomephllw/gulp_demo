@@ -12,7 +12,7 @@ import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
 import browserSync from 'browser-sync';
 import fs from 'fs';
-import {paths, filePaths} from './gulpfile.config';
+import {paths, filePaths, webServer} from './gulpfile.config';
 
 /**dispose css*/
 //css
@@ -121,17 +121,14 @@ function executeVersionReplace() {
             manifest: manifest
         }))
         .pipe(gulp.dest(paths.viewsAssets))
-        //支持browserSync
+        //进行browserSync重载
         .pipe(browserSync.reload({stream: true}));
 }
 
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
-    browserSync({
-        server: {
-            baseDir: './'
-        }
-    });
+    //启动静态服务器
+    launchWebServer();
 
     //执行
     runSequence(['imgs', 'css', 'js'], ['revReplace']);
@@ -141,3 +138,7 @@ gulp.task('default', ['cssClean', 'jsClean'], () => {
     gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
     gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
 });
+//启动服务器
+function launchWebServer() {
+    webServer.type === 'static' ? browserSync.init(webServer.static) : browserSync.init(webServer.dynamic);
+}

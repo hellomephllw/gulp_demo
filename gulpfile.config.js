@@ -21,6 +21,22 @@ const filePaths = {
     ]
 };
 
+/**server config*/
+const webServer = {
+    //static or dynamic
+    type: 'dynamic',
+    //static config
+    static: {
+        server: {
+            baseDir: './'
+        }
+    },
+    //dynamic config
+    dynamic: {
+        proxy: 'localhost:8000'
+    }
+};
+
 /**basic paths*/
 const paths = {
     src: 'src',
@@ -36,4 +52,4 @@ const paths = {
     jsAssets: 'assets/js'
 };
 
-export {paths, filePaths};
+export {paths, filePaths, webServer};
