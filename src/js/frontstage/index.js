@@ -1,5 +1,5 @@
 var $ = require('jquery'),
-    utility = require('utility');
+    utility = require('utilities');
 
 console.log($);
 utility.add();

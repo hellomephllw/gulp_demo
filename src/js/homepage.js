@@ -1,5 +1,6 @@
 var $ = require('jquery'),
-    util = require('lib/utility');
+    util = require('utilities');
+
 //hello man
 var variable = 0;
 var json = {
