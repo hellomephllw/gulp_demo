@@ -3,6 +3,7 @@ import gulp from 'gulp';
 import rev from 'gulp-rev';
 import revReplace from 'gulp-rev-replace';
 import sass from 'gulp-sass';
+import autoprefixer from 'gulp-autoprefixer';
 import del from 'del';
 import runSequence from 'run-sequence';
 import cmdPack from 'gulp-cmd-pack';
@@ -21,6 +22,7 @@ gulp.task('css', () =>
             //压缩css
             outputStyle: 'compressed'
         }))
+        .pipe(autoprefixer({browsers: ['last 2 versions', '> 5%']}))
         .pipe(rev())
         .pipe(gulp.dest(paths.cssAssets))
         .pipe(rev.manifest())
