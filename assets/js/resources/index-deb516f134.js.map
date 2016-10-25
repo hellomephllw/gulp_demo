@@ -1,1 +1,0 @@
-{"version":3,"names":[],"mappings":"","sources":["index.js"],"sourcesContent":["define(\"entry\" ,[\"jquery\",\"utilities\"], function(require , exports , module){\nvar $ = require('jquery'),\r\n    utility = require('utilities');\r\n\r\nconsole.log($);\r\nutility.add();\n});\n"],"file":"../index-deb516f134.js"}

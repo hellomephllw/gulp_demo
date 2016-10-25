@@ -128,15 +128,15 @@ function executeVersionReplace() {
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
     //启动静态服务器
-    // launchWebServer();
+    launchWebServer();
 
     //执行
     runSequence(['imgs', 'css', 'js'], ['revReplace']);
 
     //监听
-    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
-    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
+    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
+    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
 });
 //启动服务器
 function launchWebServer() {

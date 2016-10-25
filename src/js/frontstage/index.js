@@ -3,3 +3,4 @@ var $ = require('jquery'),
 
 console.log($);
 utility.add();
+console.log(11);

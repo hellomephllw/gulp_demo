@@ -24,7 +24,7 @@ const filePaths = {
 /**server config*/
 const webServer = {
     //static or dynamic
-    type: 'dynamic',
+    type: 'static',
     //static config
     static: {
         server: {
