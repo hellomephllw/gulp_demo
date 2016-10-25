@@ -1,4 +1,5 @@
 'use strict';
+import {paths, filePaths, webServer} from './gulpfile.config';
 import gulp from 'gulp';
 import rev from 'gulp-rev';
 import revReplace from 'gulp-rev-replace';
@@ -6,13 +7,12 @@ import sass from 'gulp-sass';
 import autoprefixer from 'gulp-autoprefixer';
 import del from 'del';
 import runSequence from 'run-sequence';
-import cmdPack from 'gulp-cmd-pack';
+import cmdMulti from './src/js/lib/gulp-cmd-multi';
 import concat from 'gulp-concat';
 import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
 import browserSync from 'browser-sync';
 import fs from 'fs';
-import {paths, filePaths, webServer} from './gulpfile.config';
 
 /**dispose css*/
 //css
@@ -52,7 +52,7 @@ gulp.task('js', () => {
 
     //special
     gulp.src(filePaths.jsFiles.map(filePath => `${paths.jsSrc}/${filePath}`))
-        .pipe(cmdPack({
+        .pipe(cmdMulti({
             //入口模块id
             mainId: 'entry',
             //基础路径
@@ -128,15 +128,15 @@ function executeVersionReplace() {
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
     //启动静态服务器
-    launchWebServer();
+    // launchWebServer();
 
     //执行
     runSequence(['imgs', 'css', 'js'], ['revReplace']);
 
     //监听
-    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
-    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
+    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
+    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
 });
 //启动服务器
 function launchWebServer() {
