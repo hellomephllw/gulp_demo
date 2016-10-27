@@ -1,5 +1,5 @@
 'use strict';
-import {paths, filePaths, webServer} from './gulpfile.config';
+global.rootPath = __dirname;
 import gulp from 'gulp';
 import rev from 'gulp-rev';
 import revReplace from 'gulp-rev-replace';
@@ -7,12 +7,13 @@ import sass from 'gulp-sass';
 import autoprefixer from 'gulp-autoprefixer';
 import del from 'del';
 import runSequence from 'run-sequence';
-import cmdMulti from './src/js/lib/gulp-cmd-multi';
 import concat from 'gulp-concat';
 import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
 import browserSync from 'browser-sync';
 import fs from 'fs';
+let cmdMulti = require(`${rootPath}/src/js/lib/gulp-cmd-multi`),
+    {paths, filePaths, coreConfig} = require(`${rootPath}/src/js/lib/gulpfile.config`);
 
 /**dispose css*/
 //css
@@ -128,17 +129,17 @@ function executeVersionReplace() {
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
     //启动静态服务器
-    launchWebServer();
+    // launchWebServer();
 
     //执行
     runSequence(['imgs', 'css', 'js'], ['revReplace']);
 
     //监听
-    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
-    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
+    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
+    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
 });
 //启动服务器
 function launchWebServer() {
-    webServer.type === 'static' ? browserSync.init(webServer.static) : browserSync.init(webServer.dynamic);
+    coreConfig.serverType === 'static' ? browserSync.init(coreConfig.staticServer) : browserSync.init(coreConfig.dynamicServer);
 }
