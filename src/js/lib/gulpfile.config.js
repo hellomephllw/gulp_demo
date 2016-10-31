@@ -105,6 +105,11 @@ function getProperties(path) {
         propertiesContent = content.split('\r\n'),
         properties = {};
 
+    //因不同操作系统可能在换行上出现差异
+    if (content.indexOf('\r\n')) propertiesContent = content.split('\r\n');
+    else if (content.indexOf('\n')) propertiesContent = content.split('\n');
+    else if (content.indexOf('\r')) propertiesContent = content.split('\r');
+
     //去除注释和空行
     propertiesContent = propertiesContent.filter(str => str.slice(0, 1) !== '#' && str.trim() !== '');
 
@@ -121,7 +126,12 @@ function getProperties(path) {
 
 function getSingleLineValues(path) {
     let content = fs.readFileSync(path, 'utf8'),
-        paths = content.split('\r\n');
+        paths = '';
+
+    //因不同操作系统可能在换行上出现差异
+    if (content.indexOf('\r\n')) paths = content.split('\r\n');
+    else if (content.indexOf('\n')) paths = content.split('\n');
+    else if (content.indexOf('\r')) paths = content.split('\r');
 
     //去除注释和空行
     paths = paths.filter(str => str.slice(0, 1) !== '#' && str.trim() !== '');
