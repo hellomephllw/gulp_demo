@@ -1,4 +1,6 @@
 {
   "homepage.js": "homepage-a0d6e77047.js",
-  "index.js": "index-e64c53b7f5.js"
+  "index.js": "index-6dd8823a89.js",
+  "resources/homepage.js": "resources/homepage-a0d6e77047.js.map",
+  "resources/index.js": "resources/index-6dd8823a89.js.map"
 }

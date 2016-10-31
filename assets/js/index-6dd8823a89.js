@@ -13,7 +13,7 @@ var $ = require('jquery'),
 
 console.log($);
 utility.add();
-console.log(11);
+console.log(2);
 });
 
-//# sourceMappingURL=resources/index-e64c53b7f5.js.map
+//# sourceMappingURL=resources/index-6dd8823a89.js.map
