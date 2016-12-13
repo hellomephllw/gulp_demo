@@ -1,0 +1,121 @@
+1.关于配置文件
+a)所有的配置文件在src/config目录内，主要包含一些源码文件路径和一些常用配置项
+
+2.关于目录结构
+a)目录结构如下：
+gulp_demo
+    - assets 【编译后的css和js】
+        - css
+        - js
+    - doc   【说明】
+    - src   【前端开发源码】
+        - config    【配置文件】
+            - base.core.properties  【对gulp的控制】
+            - base.paths.properties 【所有源码和编译代码的基础路径】
+            - css.files.properties  【css源码所在路径】
+            - js.alias.properties   【js别名】
+            - js.common.properties  【js的common文件配置】
+            - js.files.properties   【js源码所在路径】
+            - js.ignore.properties  【js在编译时需要忽略的别名】
+        - css   【css源码】
+            - common        【css的公共部分】
+            - components    【css公共组件】
+                - plugins   【插件css部分】
+            - source        【css源码】
+                - backstage
+                - forestage
+                    - homepage
+                        - test.scss
+        - fonts 【字体】
+        - imgs  【图片】
+        - js    【js源码】
+            - components    【js公共组件】
+                - plugins   【插件js部分】
+            - lib           【js库】
+            - source        【js源码】
+                - backstage
+                - forestage
+                    - homepage
+                        - test.js
+        - views 【jsp/html源码】
+            - components    【views公共组件】
+                - plugins   【插件views部分】
+            - source        【views源码】
+                - backstage
+                - forestage
+                    - homepage
+                        - test.html
+    - views 【编译后的jsp/html】
+        - forestage
+            - homepage
+                - test.html
+
+3.关于依赖处理
+a)css的依赖一律使用本地相对路径，因为gulp会在本地编译，如@import '../../../variable.scss'
+b)js除了已配置别名的模块可以直接用alias依赖，其他的也一律使用本地相对路径
+c)views所有的静态资源(如:图片、css、js)，全部用斜杠/开头，如/assets/forstage/homepage/test.css
+
+4.关于js代码规范
+a)字符串全部使用单引号
+b)缩进全部使用tab或4个空格
+c)使用jq获取的dom对象，一律使用$符号开头命名变量，如：var $btn = $('#btn');
+d)非dom节点对象，请使用驼峰命名变量
+e)ajax一律使用$.ajax()，仅仅是为了统一，便于维护和阅读
+f)所有事件绑定采用on方法
+g)js编码规范如下：
+var xxx = require('xxx');
+
+var homepage = {
+    //初始化
+    init: function() {
+        this.initPage();
+        this.initEvent();
+        this.initComponent();
+    },
+    //初始化页面
+    initPage: function() {
+        this.showAllProducts();
+    },
+    //初始化事件
+    initEvent: function() {
+        this.addProduct();
+    },
+    //初始化组件
+    initComponent: function() {
+        xxx.init();
+    },
+    showAllProducts: function() {
+        $.ajax({
+            url: '',
+            success: function(data) {}
+        });
+    },
+    addProduct: function() {
+        $('#btn').on('click', function() {});
+    }
+};
+
+homepage.init();
+
+5.关于css代码规范
+a)css代码一律使用bem规范
+b)字体、比较统一的颜色、内容去宽度等公共部分全部抽出变量放入common/variable.scss
+c)尽量多使用mixin降低冗余度，公共的mixin放入common/mixin.scss，非公共的就写在当前代码里
+d)为了方便后期维护和修改，请把每个页面的css做如下处理：
+    - source
+        - forestage
+            - homepage
+                - header.scss
+                - nav.scss
+                - main.scss
+                - products.scss
+                - footer.scss
+                - ads.scss
+                - index.scss
+在index.scss中导入所有块的代码：
+@import 'header.scss';
+@import 'nav.scss';
+@import 'main.scss';
+@import 'products.scss';
+@import 'footer.scss';
+@import 'ads.scss';
