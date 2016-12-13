@@ -27,7 +27,7 @@
     "node-cli": "^0.1.0",
     "promise": "^7.1.1",
     "run-sequence": "^1.2.2",
-    "through2": "^2.0.1",
+    "through2": "^2.0.3",
     "underscore": "^1.8.3"
   }
 }

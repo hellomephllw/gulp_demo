@@ -12,25 +12,30 @@ import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
 import browserSync from 'browser-sync';
 import fs from 'fs';
+import through from 'through2';
+// var through = require('through2');
 let cmdMulti = require(`${rootPath}/src/js/lib/gulp-cmd-multi`),
     md5 = require(`${rootPath}/src/js/lib/md5`),
     {paths, filePaths, coreConfig} = require(`${rootPath}/src/js/lib/gulpfile.config`);
 
 /**dispose css*/
 //css
-gulp.task('css', () =>
+gulp.task('css', () => {
+    //决定是否压缩css
+    let outputStyle = Boolean(coreConfig['cssCompress']) ? 'compressed' : undefined;
+
     gulp.src(filePaths.cssFiles.map(filePath => `${paths.cssSrc}/${filePath}`))
         //编译css代码
         .pipe(sass({
             //压缩css
-            outputStyle: 'compressed'
+            outputStyle: outputStyle
         }))
         .pipe(autoprefixer({browsers: ['last 2 versions', '> 5%']}))
         .pipe(rev())
         .pipe(gulp.dest(paths.cssAssets))
         .pipe(rev.manifest())
         .pipe(gulp.dest(`${paths.cssAssets}/${paths.resources}`))
-);
+});
 //clean
 gulp.task('cssClean', () => del([`${paths.cssAssets}/**/*.css`, `${paths.cssAssets}/${paths.resources}/*.json`]));
 
@@ -51,6 +56,9 @@ gulp.task('fonts', () =>
 /**dispose scripts*/
 //js
 gulp.task('js', () => {
+    //决定是否压缩js
+    let jsCompress = Boolean(coreConfig['jsCompress']) ? uglify : () => through.obj((file, enc, cb) => cb(null, file));
+
     //common
     gulp.src(filePaths.jsCommon.map(filename => `${paths.jsSrc}/${filename}`))
         .pipe(concat('common.js'))
@@ -70,7 +78,7 @@ gulp.task('js', () => {
         }))
         .pipe(sourcemaps.init())
         //压缩
-        // .pipe(uglify())
+        .pipe(jsCompress())
         //hashcode
         .pipe(rev())
         //source map
@@ -158,20 +166,31 @@ function executeVersionReplace() {
         .pipe(gulp.dest(paths.viewsAssets))
         //进行browserSync重载
         .pipe(browserSync.reload({stream: true}));
+
+    console.log('compile views...');
 }
 
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
+    //第一次启动gulp需要执行的任务
+    let runArr = [];
+    if (Boolean(coreConfig['moveFonts'])) runArr.push('fonts');
+    if (Boolean(coreConfig['moveImgs'])) runArr.push('imgs');
+    if (Boolean(coreConfig['compileCss'])) runArr.push('css');
+    if (Boolean(coreConfig['compileJs'])) runArr.push('js');
+
     //启动静态服务器
-    // launchWebServer();
+    if (Boolean(coreConfig['browserSync'])) launchWebServer();
 
     //执行
-    runSequence('revReplaceForWatch', ['imgs', 'fonts', 'css', 'js']);
+    runSequence('revReplaceForWatch', runArr);
+    //强制编译views
+    if (Boolean(coreConfig['compileViewsForce'])) executeVersionReplace();
 
     //监听
-    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('cssClean', 'css'));
-    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('jsClean', 'js'));
+    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('cssClean', 'css'));
+    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('jsClean', 'js'));
+    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
 });
 //启动服务器
 function launchWebServer() {

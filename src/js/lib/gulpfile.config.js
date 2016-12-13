@@ -68,7 +68,10 @@ function initCssFilePath() {
 /**server config*/
 function initCoreConfig() {
     let properties = getProperties(`${configPath}/${filenames.coreConfigPaths}`),
+        //default config
         coreConfig = {
+            //close browserSync
+            browserSync: false,
             //static or dynamic
             serverType: 'static',
             //static config
@@ -79,15 +82,30 @@ function initCoreConfig() {
             },
             //dynamic config
             dynamicServer: {
-                proxy: 'localhost:8000'
-            }
+                proxy: 'localhost:8080'
+            },
+            //execute gulp for first time
+            moveFonts: false,
+            moveImages: false,
+            compileCss: false,
+            compileJs: false,
+            //compress
+            cssCompress: false,
+            jsCompress: false
         };
 
     if (properties['serverType']) coreConfig.serverType = properties['serverType'];
     if (properties['baseDir']) coreConfig.staticServer.server.baseDir = rootPath + properties['baseDir'];
     if (properties['proxy']) coreConfig.dynamicServer.proxy = properties['proxy'];
-    if (Boolean(properties['browserSync'])) coreConfig.browserSync = true;
 
+    if (Boolean(properties['browserSync'])) coreConfig.browserSync = true;
+    if (Boolean(properties['moveFonts'])) coreConfig.moveFonts = true;
+    if (Boolean(properties['moveImgs'])) coreConfig.moveImgs = true;
+    if (Boolean(properties['compileCss'])) coreConfig.compileCss = true;
+    if (Boolean(properties['compileJs'])) coreConfig.compileJs = true;
+
+    if (Boolean(properties['cssCompress'])) coreConfig.cssCompress = true;
+    if (Boolean(properties['jsCompress'])) coreConfig.jsCompress = true;
 
     return coreConfig;
 }
