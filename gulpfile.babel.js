@@ -13,7 +13,6 @@ import sourcemaps from 'gulp-sourcemaps';
 import browserSync from 'browser-sync';
 import fs from 'fs';
 import through from 'through2';
-// var through = require('through2');
 let cmdMulti = require(`${rootPath}/src/js/lib/gulp-cmd-multi`),
     md5 = require(`${rootPath}/src/js/lib/md5`),
     {paths, filePaths, coreConfig} = require(`${rootPath}/src/js/lib/gulpfile.config`);
