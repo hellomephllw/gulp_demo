@@ -1,5 +1,5 @@
 'use strict';
-import {paths, filePaths, webServer} from './gulpfile.config';
+global.rootPath = __dirname;
 import gulp from 'gulp';
 import rev from 'gulp-rev';
 import revReplace from 'gulp-rev-replace';
@@ -7,12 +7,14 @@ import sass from 'gulp-sass';
 import autoprefixer from 'gulp-autoprefixer';
 import del from 'del';
 import runSequence from 'run-sequence';
-import cmdMulti from './src/js/lib/gulp-cmd-multi';
 import concat from 'gulp-concat';
 import uglify from 'gulp-uglify';
 import sourcemaps from 'gulp-sourcemaps';
 import browserSync from 'browser-sync';
 import fs from 'fs';
+let cmdMulti = require(`${rootPath}/src/js/lib/gulp-cmd-multi`),
+    md5 = require(`${rootPath}/src/js/lib/md5`),
+    {paths, filePaths, coreConfig} = require(`${rootPath}/src/js/lib/gulpfile.config`);
 
 /**dispose css*/
 //css
@@ -30,17 +32,21 @@ gulp.task('css', () =>
         .pipe(gulp.dest(`${paths.cssAssets}/${paths.resources}`))
 );
 //clean
-gulp.task('cssClean', () => del(`${paths.cssAssets}/**/*.css`));
+gulp.task('cssClean', () => del([`${paths.cssAssets}/**/*.css`, `${paths.cssAssets}/${paths.resources}/*.json`]));
 
 /**dispose images*/
 //imgs
 gulp.task('imgs', () =>
-    gulp.src(`${paths.imgsSrc}/*`)
+    gulp.src(`${paths.imgsSrc}/**`)
         .pipe(gulp.dest(`${paths.imgsAssets}`))
 );
 
 /**dispose fonts*/
 //fonts
+gulp.task('fonts', () =>
+    gulp.src(`${paths.fontsSrc}/**`)
+        .pipe(gulp.dest(`${paths.fontsAssets}`))
+);
 
 /**dispose scripts*/
 //js
@@ -77,7 +83,7 @@ gulp.task('js', () => {
         .pipe(gulp.dest(`${paths.jsAssets}/${paths.resources}`));
 });
 //clean
-gulp.task('jsClean', () => del(`${paths.jsAssets}/**/*(*.js|*.map)`));
+gulp.task('jsClean', () => del([`${paths.jsAssets}/**/*(*.js|*.map)`, `${paths.jsAssets}/${paths.resources}/*.json`]));
 
 /**dispose views*/
 //revReplace
@@ -85,26 +91,55 @@ gulp.task('revReplace', () => {
     //执行替换
     executeVersionReplace();
 });
+//manifest内容缓存
+let prevJsContent = '',
+    prevCssContent = '';
 //revReplace for watch
 gulp.task('revReplaceForWatch', () => {
-    //开启监听
-    let jsWatcher = fs.watch(`${paths.jsAssets}/${paths.resources}/rev-manifest.json`),
-        cssWatcher = fs.watch(`${paths.cssAssets}/${paths.resources}/rev-manifest.json`);
+    //manifest文件路径
+    const
+        jsRevManifestPath = `${paths.jsAssets}/${paths.resources}/rev-manifest.json`,
+        cssRevManifestPath = `${paths.cssAssets}/${paths.resources}/rev-manifest.json`;
 
-    //manifest文件改动handler
-    jsWatcher.on('change', () => {
-        //关闭监听
-        jsWatcher.close();
-        cssWatcher.close();
+    //开启对js文件改动的监听
+    fs.watchFile(jsRevManifestPath, {interval: 300}, (curr, prev) => {
+        //文件被删除或新增时忽略
+        if (curr.mtime.getTime() === 0) return ;
+        //文件没有发生改动时忽略
+        if (curr.mtime.getTime() - prev.mtime.getTime() === 0) return ;
+
+        //读取文件内容
+        let data = fs.readFileSync(jsRevManifestPath, 'utf8');
+
+        //读取的文件数据为空时忽略
+        if (data === '') return ;
+        //文件内容没有发生改变时忽略
+        if (md5(data) === md5(prevJsContent)) return ;
+
         //执行替换
         executeVersionReplace();
+        //存储改变后的内容
+        prevJsContent = data;
     });
-    cssWatcher.on('change', () => {
-        //关闭监听
-        jsWatcher.close();
-        cssWatcher.close();
+    //开启对css文件改动的监听
+    fs.watchFile(cssRevManifestPath, {interval: 300}, (curr, prev) => {
+        //文件被删除或新增时忽略
+        if (curr.mtime.getTime() === 0) return ;
+        //文件没有发生改动时忽略
+        if (curr.mtime.getTime() - prev.mtime.getTime() === 0) return ;
+
+        //读取文件内容
+        let data = fs.readFileSync(cssRevManifestPath, 'utf8');
+
+        //读取的文件数据为空时忽略
+        if (data === '') return ;
+        //文件内容没有发生改变时忽略
+        if (md5(data) === md5(prevCssContent)) return ;
+
         //执行替换
         executeVersionReplace();
+        //存储改变后的内容
+        prevCssContent = data;
     });
 });
 //执行页面的版本替换
@@ -115,7 +150,7 @@ function executeVersionReplace() {
         `${paths.cssAssets}/${paths.resources}/rev-manifest.json`
     ]);
 
-    gulp.src(`${paths.viewsSrc}/*.html`)
+    gulp.src(`${paths.viewsSrc}/source/**/*.html`)
         //根据rev-manifest.json替换文件名
         .pipe(revReplace({
             manifest: manifest
@@ -128,17 +163,17 @@ function executeVersionReplace() {
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
     //启动静态服务器
-    launchWebServer();
+    // launchWebServer();
 
     //执行
-    runSequence(['imgs', 'css', 'js'], ['revReplace']);
+    runSequence('revReplaceForWatch', ['imgs', 'fonts', 'css', 'js']);
 
     //监听
-    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('revReplaceForWatch', 'cssClean', 'css'));
-    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('revReplaceForWatch', 'jsClean', 'js'));
+    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('cssClean', 'css'));
+    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('jsClean', 'js'));
 });
 //启动服务器
 function launchWebServer() {
-    webServer.type === 'static' ? browserSync.init(webServer.static) : browserSync.init(webServer.dynamic);
+    coreConfig.serverType === 'static' ? browserSync.init(coreConfig.staticServer) : browserSync.init(coreConfig.dynamicServer);
 }

@@ -44,7 +44,12 @@ module.exports = function (option) {
         if (file.isBuffer()) {
             option.content = file.contents.toString();
             //可支持多个入口文件 fixed by llw
+<<<<<<< HEAD
             option.mods = option.mods.filter(mod => mod.id !== option.mainId);
+=======
+            option.mods = [];
+            option.cache = {};
+>>>>>>> browsersync
             parseContents(option, file).then(function () {
                 var jsFilePath = file.base + path.sep + file.relative;
                 jsFilePath = path.normalize(jsFilePath);
