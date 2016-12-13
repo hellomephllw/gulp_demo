@@ -1,12 +1,19 @@
 # gulp_demo
 
 ##目录结构
+
 gulp_demo
+
     - assets 【编译后的css和js】
+    
         - css
+        
         - js
+        
     - doc   【说明】
+    
     - src   【前端开发源码】
+    
         - config    【配置文件】
             - base.core.properties  【对gulp的控制】
             - base.paths.properties 【所有源码和编译代码的基础路径】
