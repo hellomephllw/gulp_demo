@@ -37,12 +37,16 @@ gulp.task('cssClean', () => del([`${paths.cssAssets}/**/*.css`, `${paths.cssAsse
 /**dispose images*/
 //imgs
 gulp.task('imgs', () =>
-    gulp.src(`${paths.imgsSrc}/*`)
+    gulp.src(`${paths.imgsSrc}/**`)
         .pipe(gulp.dest(`${paths.imgsAssets}`))
 );
 
 /**dispose fonts*/
 //fonts
+gulp.task('fonts', () =>
+    gulp.src(`${paths.fontsSrc}/**`)
+        .pipe(gulp.dest(`${paths.fontsAssets}`))
+);
 
 /**dispose scripts*/
 //js
@@ -146,7 +150,7 @@ function executeVersionReplace() {
         `${paths.cssAssets}/${paths.resources}/rev-manifest.json`
     ]);
 
-    gulp.src(`${paths.viewsSrc}/*.html`)
+    gulp.src(`${paths.viewsSrc}/source/**/*.html`)
         //根据rev-manifest.json替换文件名
         .pipe(revReplace({
             manifest: manifest
@@ -159,15 +163,15 @@ function executeVersionReplace() {
 /**default*/
 gulp.task('default', ['cssClean', 'jsClean'], () => {
     //启动静态服务器
-    launchWebServer();
+    // launchWebServer();
 
     //执行
-    runSequence('revReplaceForWatch', ['imgs', 'css', 'js']);
+    runSequence('revReplaceForWatch', ['imgs', 'fonts', 'css', 'js']);
 
     //监听
-    gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('cssClean', 'css'));
-    gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
-    gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('jsClean', 'js'));
+    // gulp.watch(`${paths.cssSrc}/**/*.scss`, () => runSequence('cssClean', 'css'));
+    // gulp.watch(`${paths.viewsSrc}/**/*.html`, () => runSequence('revReplace'));
+    // gulp.watch(`${paths.jsSrc}/**/*.js`, () => runSequence('jsClean', 'js'));
 });
 //启动服务器
 function launchWebServer() {

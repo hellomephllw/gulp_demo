@@ -2,13 +2,13 @@ import fs from 'fs';
 
 const
     //配置文件路径
-    configPath = `${rootPath}/doc/config`,
+    configPath = `${rootPath}/src/config`,
     //文件名
     filenames = {
-        scriptFiles: 'script.files.properties',
-        scriptCommon: 'script.common.properties',
-        scriptAlia: 'script.alias.properties',
-        scriptIgnore: 'script.ignore.properties',
+        jsFiles: 'js.files.properties',
+        jsCommon: 'js.common.properties',
+        jsAlia: 'js.alias.properties',
+        jsIgnore: 'js.ignore.properties',
         cssFiles: 'css.files.properties',
         basePaths: 'base.paths.properties',
         coreConfigPaths: 'base.core.properties'
@@ -25,10 +25,10 @@ const
 function initFilePaths() {
     let filePaths = {};
 
-    filePaths.jsCommon = initScriptCommonPaths();
+    filePaths.jsCommon = initJsCommonPaths();
     filePaths.jsFiles = initScriptFilePaths();
-    filePaths.jsAlias = initScriptAliaPaths();
-    filePaths.jsIgnore = initScriptIgnoreAlias();
+    filePaths.jsAlias = initJsAliaPaths();
+    filePaths.jsIgnore = initJsIgnoreAlias();
     filePaths.cssFiles = initCssFilePath();
 
     return filePaths;
@@ -37,26 +37,26 @@ function initFilePaths() {
 //初始化js脚本路径
 function initScriptFilePaths() {
 
-    return getSingleLineValues(`${configPath}/${filenames.scriptFiles}`);
+    return getSingleLineValues(`${configPath}/${filenames.jsFiles}`);
 }
 
 //初始化js别名路径
-function initScriptAliaPaths() {
-    let alias = getProperties(`${configPath}/${filenames.scriptAlia}`);
+function initJsAliaPaths() {
+    let alias = getProperties(`${configPath}/${filenames.jsAlia}`);
 
     return alias;
 }
 
 //初始化common中的js文件路径
-function initScriptCommonPaths() {
+function initJsCommonPaths() {
 
-    return getSingleLineValues(`${configPath}/${filenames.scriptCommon}`);
+    return getSingleLineValues(`${configPath}/${filenames.jsCommon}`);
 }
 
 //初始化忽视别名
-function initScriptIgnoreAlias() {
+function initJsIgnoreAlias() {
 
-    return getSingleLineValues(`${configPath}/${filenames.scriptIgnore}`)
+    return getSingleLineValues(`${configPath}/${filenames.jsIgnore}`)
 }
 
 //初始化css文件路径
@@ -102,13 +102,16 @@ function initBasePath() {
 /**utilities*/
 function getProperties(path) {
     let content = fs.readFileSync(path, 'utf8'),
-        propertiesContent = content.split('\r\n'),
+        lineBreak = '',
         properties = {};
 
     //因不同操作系统可能在换行上出现差异
-    if (content.indexOf('\r\n')) propertiesContent = content.split('\r\n');
-    else if (content.indexOf('\n')) propertiesContent = content.split('\n');
-    else if (content.indexOf('\r')) propertiesContent = content.split('\r');
+    if (content.indexOf('\r\n') !== -1) lineBreak = '\r\n';
+    else if (content.indexOf('\n') !== -1) lineBreak = '\n';
+    else if (content.indexOf('\r') !== -1) lineBreak = '\r';
+
+    //按换行拆分
+    let propertiesContent = content.split(lineBreak);
 
     //去除注释和空行
     propertiesContent = propertiesContent.filter(str => str.slice(0, 1) !== '#' && str.trim() !== '');
@@ -126,12 +129,16 @@ function getProperties(path) {
 
 function getSingleLineValues(path) {
     let content = fs.readFileSync(path, 'utf8'),
+        lineBreak = '',
         paths = '';
 
     //因不同操作系统可能在换行上出现差异
-    if (content.indexOf('\r\n')) paths = content.split('\r\n');
-    else if (content.indexOf('\n')) paths = content.split('\n');
-    else if (content.indexOf('\r')) paths = content.split('\r');
+    if (content.indexOf('\r\n') !== -1) lineBreak = '\r\n';
+    else if (content.indexOf('\n') !== -1) lineBreak = '\n';
+    else if (content.indexOf('\r') !== -1) lineBreak = '\r';
+
+    //按换行拆分
+    paths = content.split(lineBreak);
 
     //去除注释和空行
     paths = paths.filter(str => str.slice(0, 1) !== '#' && str.trim() !== '');

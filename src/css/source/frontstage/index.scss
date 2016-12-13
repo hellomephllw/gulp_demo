@@ -1,0 +1,11 @@
+@import '../../common/variable';
+@import '../../common/mixin';
+@import '../../component/header';
+
+body {
+  font-size: $fontSizeDefault;
+}
+
+@import 'product';
+
+@import '../../component/footer';
